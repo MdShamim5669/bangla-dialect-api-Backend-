@@ -83,6 +83,40 @@ async def health_check():
     }
 
 
+@app.get("/api/regions")
+async def get_regions():
+    """
+    Returns authentic regional metadata, sample sentences and evaluation metrics
+    directly from the research dataset and model evaluation.
+    """
+    from backend.hf_client import REAL_TEST_PREDICTIONS
+
+    region_metadata = [
+        {"id": "Chittagong", "nameEn": "Chittagong", "nameBn": "চট্টগ্রাম", "division": "দক্ষিণ-পূর্ব", "bleu": 31.63, "test_n": 113, "dataset_pairs": 1129},
+        {"id": "Noakhali", "nameEn": "Noakhali", "nameBn": "নোয়াখালী", "division": "দক্ষিণ-পূর্ব", "bleu": 47.49, "test_n": 250, "dataset_pairs": 2492},
+        {"id": "Barishal", "nameEn": "Barishal", "nameBn": "বরিশাল", "division": "দক্ষিণ", "bleu": 44.17, "test_n": 153, "dataset_pairs": 1499},
+        {"id": "Rangpur", "nameEn": "Rangpur", "nameBn": "রংপুর", "division": "উত্তর", "bleu": 54.14, "test_n": 250, "dataset_pairs": 2496},
+        {"id": "Pabna", "nameEn": "Pabna", "nameBn": "পাবনা", "division": "পশ্চিম", "bleu": 50.63, "test_n": 250, "dataset_pairs": 2498},
+        {"id": "Mymensingh", "nameEn": "Mymensingh", "nameBn": "ময়মনসিংহ", "division": "উত্তর-মধ্য", "bleu": 41.73, "test_n": 153, "dataset_pairs": 1499},
+        {"id": "Jashore", "nameEn": "Jashore", "nameBn": "যশোর", "division": "দক্ষিণ-পশ্চিম", "bleu": 69.31, "test_n": 250, "dataset_pairs": 2498},
+    ]
+
+    result = []
+    for reg in region_metadata:
+        rid = reg["id"]
+        pairs = REAL_TEST_PREDICTIONS.get(rid, {})
+        examples = []
+        for dialect_text, std_text in pairs.items():
+            if len(dialect_text) > 8 and dialect_text != std_text:
+                examples.append(dialect_text)
+                if len(examples) >= 4:
+                    break
+
+        result.append({**reg, "examples": examples})
+
+    return result
+
+
 @app.post("/api/translate")
 async def translate_dialect(req: TranslateRequest):
     """

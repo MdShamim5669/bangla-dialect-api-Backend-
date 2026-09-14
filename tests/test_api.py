@@ -18,6 +18,14 @@ def test_health_endpoint():
     assert len(data["valid_regions"]) == 7
     assert data["parameters"]["num_beams"] == 4
 
+def test_regions_endpoint():
+    response = client.get("/api/regions")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 7
+    assert all("examples" in r for r in data)
+    assert all("bleu" in r for r in data)
+
 def test_insights_endpoint():
     response = client.get("/api/insights")
     assert response.status_code == 200
