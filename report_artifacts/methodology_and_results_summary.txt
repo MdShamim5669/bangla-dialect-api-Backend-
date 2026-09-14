@@ -1,0 +1,35 @@
+BANGLAT5 FINAL RUN SUMMARY
+Research direction: Regional dialect -> Standard Bengali
+Source file: Master_sheet_Dataset.xlsx
+Model: csebuetnlp/banglat5
+Seed: 42
+
+DATA AND SPLIT
+Unique Standard Bengali IDs: 2500
+Total dialect-standard pairs: 14130
+Train/validation/test pairs before balancing: 11316 / 1395 / 1419
+Training pairs after train-only balancing: 14000
+Exact ID overlap across splits: 0
+Exact target overlap across splits: 0
+Split strategy used: ID-grouped 80/10/10
+
+TRAINING
+Maximum epochs: 12
+Best validation loss: 2.3942110538482666
+Best checkpoint: banglat5_final_outputs/checkpoints/checkpoint-7000
+Training time (minutes): 82.82
+FP16: False
+BF16: True
+
+LOCKED TEST RESULTS (2 lexical + 2 semantic metrics)
+BLEU: 50.8723 (95% bootstrap CI 47.5679-53.9418)
+chrF: 75.3363 (95% bootstrap CI 73.2854-77.2143)
+BERTScore F1: 0.939191 (95% bootstrap CI 0.933763-0.945100)
+STS Cosine Similarity: 0.924424 (95% bootstrap CI 0.915494-0.933207)
+Exact match rate: 24.8062%
+Selected beam width: 4 (selected on validation only)
+
+INTERPRETATION CAUTION
+Automatic metrics must be interpreted together. chrF is useful for Bengali morphology and spelling variation,
+while BERTScore captures semantic similarity. Qualitative examples should be independently reviewed by fluent
+speakers. The test set was not used for training, early stopping, balancing, or decoding selection.

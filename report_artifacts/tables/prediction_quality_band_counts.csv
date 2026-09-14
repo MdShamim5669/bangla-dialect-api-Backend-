@@ -1,0 +1,29 @@
+region,quality_band,Sentences
+Barishal,Difficult (chrF < 50),29
+Barishal,Exact match,27
+Barishal,Moderate (50 <= chrF < 80),58
+Barishal,Near match (chrF >= 80),39
+Chittagong,Difficult (chrF < 50),38
+Chittagong,Exact match,15
+Chittagong,Moderate (50 <= chrF < 80),45
+Chittagong,Near match (chrF >= 80),15
+Jashore,Difficult (chrF < 50),7
+Jashore,Exact match,103
+Jashore,Moderate (50 <= chrF < 80),62
+Jashore,Near match (chrF >= 80),78
+Mymensingh,Difficult (chrF < 50),30
+Mymensingh,Exact match,28
+Mymensingh,Moderate (50 <= chrF < 80),63
+Mymensingh,Near match (chrF >= 80),32
+Noakhali,Difficult (chrF < 50),34
+Noakhali,Exact match,52
+Noakhali,Moderate (50 <= chrF < 80),105
+Noakhali,Near match (chrF >= 80),59
+Pabna,Difficult (chrF < 50),34
+Pabna,Exact match,61
+Pabna,Moderate (50 <= chrF < 80),97
+Pabna,Near match (chrF >= 80),58
+Rangpur,Difficult (chrF < 50),22
+Rangpur,Exact match,66
+Rangpur,Moderate (50 <= chrF < 80),90
+Rangpur,Near match (chrF >= 80),72

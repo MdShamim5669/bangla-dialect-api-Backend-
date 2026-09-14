@@ -1,0 +1,6 @@
+BanglaT5 model card: https://huggingface.co/csebuetnlp/banglat5
+BanglaNLG/BanglaT5 paper: https://aclanthology.org/2023.findings-eacl.54/
+Hugging Face translation guide: https://huggingface.co/docs/transformers/tasks/translation
+Hugging Face Trainer API: https://huggingface.co/docs/transformers/main_classes/trainer
+SacreBLEU: https://github.com/mjpost/sacrebleu
+BERTScore: https://github.com/Tiiiger/bert_score

@@ -1,0 +1,11 @@
+Column,Non_empty_before,NFC_changes,Rows_with_zero_width,Rows_changed_by_cleaning,Non_empty_after
+Standard Bangla,2500,993,0,1086,2500
+Banglish,2500,0,0,0,2500
+English,2500,0,0,2,2500
+Pabna,2500,1375,5,1533,2500
+Noakhali,2500,738,0,770,2500
+Jashore,2500,1039,0,1119,2500
+Rangpur,2500,813,2,1426,2500
+Mymensingh,1500,814,0,815,1500
+Barishal,1500,248,0,984,1500
+Chittagong,1130,498,2,566,1130

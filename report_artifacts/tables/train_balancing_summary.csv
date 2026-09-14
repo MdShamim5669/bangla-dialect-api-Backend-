@@ -1,0 +1,8 @@
+Region,Original_Train_Pairs,Balanced_Train_Pairs,Added_Training_Instances,Unique_Training_Pairs
+Pabna,2000,2000,0,2000
+Noakhali,2000,2000,0,2000
+Jashore,2000,2000,0,2000
+Rangpur,2000,2000,0,2000
+Mymensingh,1204,2000,796,1204
+Barishal,1204,2000,796,1204
+Chittagong,908,2000,1092,908
