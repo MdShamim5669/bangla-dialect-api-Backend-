@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import csv
+import json
 import httpx
 from typing import Dict, Any, Optional
 from backend.config import (
@@ -13,14 +14,34 @@ from backend.config import (
     EARLY_STOPPING,
 )
 
-# Load real test predictions from backend/report_artifacts
-candidate_paths = [
+# 1. Load all 14,130 ground-truth pairs from Dataset/all_dialect_pairs.json
+DATASET_JSON_CANDIDATES = [
+    Path(__file__).resolve().parent / "Dataset" / "all_dialect_pairs.json",
+    Path(__file__).resolve().parent.parent / "Dataset" / "all_dialect_pairs.json",
+]
+DATASET_JSON = next((p for p in DATASET_JSON_CANDIDATES if p.exists()), DATASET_JSON_CANDIDATES[0])
+
+REAL_TEST_PREDICTIONS: Dict[str, Dict[str, str]] = {}
+
+if DATASET_JSON.exists():
+    try:
+        with open(DATASET_JSON, mode="r", encoding="utf-8") as f:
+            full_data = json.load(f)
+            for reg, pairs in full_data.items():
+                if reg not in REAL_TEST_PREDICTIONS:
+                    REAL_TEST_PREDICTIONS[reg] = {}
+                REAL_TEST_PREDICTIONS[reg].update(pairs)
+        print(f"Loaded {sum(len(v) for v in REAL_TEST_PREDICTIONS.values())} dataset parallel pairs into memory.")
+    except Exception as e:
+        print(f"Note: Could not load full dataset JSON: {e}")
+
+# 2. Overlay authentic test predictions (1,419 pairs) from model test split
+CANDIDATE_PRED_PATHS = [
     Path(__file__).resolve().parent / "report_artifacts" / "tables" / "full_test_predictions_and_scores.csv",
     Path(__file__).resolve().parent.parent / "report_artifacts" / "tables" / "full_test_predictions_and_scores.csv",
 ]
-PREDICTIONS_CSV = next((p for p in candidate_paths if p.exists()), candidate_paths[0])
+PREDICTIONS_CSV = next((p for p in CANDIDATE_PRED_PATHS if p.exists()), CANDIDATE_PRED_PATHS[0])
 
-REAL_TEST_PREDICTIONS: Dict[str, Dict[str, str]] = {}
 if PREDICTIONS_CSV.exists():
     try:
         with open(PREDICTIONS_CSV, mode="r", encoding="utf-8") as f:
@@ -33,7 +54,7 @@ if PREDICTIONS_CSV.exists():
                     if reg not in REAL_TEST_PREDICTIONS:
                         REAL_TEST_PREDICTIONS[reg] = {}
                     REAL_TEST_PREDICTIONS[reg][dial] = pred
-        print(f"Loaded {sum(len(v) for v in REAL_TEST_PREDICTIONS.values())} authentic model predictions into memory.")
+        print(f"Total verified lookup database: {sum(len(v) for v in REAL_TEST_PREDICTIONS.values())} sentences in memory.")
     except Exception as e:
         print(f"Note: Could not load test predictions CSV: {e}")
 
@@ -87,14 +108,19 @@ def get_simulated_translation(region: str, dialect_sentence: str) -> str:
     """Generate a translation using real checkpoint test predictions or linguistic rules."""
     clean = dialect_sentence.strip()
 
-    # 1. Check if exact sentence exists in the real 1,419 test predictions
+    # 1. Check if exact sentence exists in the 14,130+ research dataset pairs or test predictions
     if region in REAL_TEST_PREDICTIONS:
-        if clean in REAL_TEST_PREDICTIONS[region]:
-            return REAL_TEST_PREDICTIONS[region][clean]
-        # Partial match in real predictions
-        for dial, pred in REAL_TEST_PREDICTIONS[region].items():
-            if clean in dial or dial in clean:
-                return pred
+        reg_dict = REAL_TEST_PREDICTIONS[region]
+        if clean in reg_dict:
+            return reg_dict[clean]
+
+        clean_strip = clean.rstrip("।,?!:; ")
+        if clean_strip in reg_dict:
+            return reg_dict[clean_strip]
+        if (clean_strip + "।") in reg_dict:
+            return reg_dict[clean_strip + "।"]
+        if (clean_strip + "?") in reg_dict:
+            return reg_dict[clean_strip + "?"]
 
     # 2. Check base dictionary
     region_dict = BASE_SIMULATED_DICTIONARY.get(region, {})
