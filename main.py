@@ -45,6 +45,28 @@ class VerifySettingsRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # API Routes
 # ---------------------------------------------------------------------------
+@app.get("/")
+@app.head("/")
+async def root():
+    """Welcome endpoint providing service status and quick links."""
+    return {
+        "status": "online",
+        "name": "Bangla Regional Dialect Translator API",
+        "version": "1.0.0",
+        "documentation": "/docs",
+        "health_check": "/api/health",
+        "translate_endpoint": "/api/translate",
+        "insights_endpoint": "/api/insights",
+    }
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    from fastapi import Response, status
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+
 @app.get("/api/health")
 async def health_check():
     """Returns system status, active configuration and supported regions."""
