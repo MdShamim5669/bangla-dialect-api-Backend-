@@ -101,20 +101,55 @@ async def get_regions():
         {"id": "Jashore", "nameEn": "Jashore", "nameBn": "যশোর", "division": "দক্ষিণ-পশ্চিম", "bleu": 69.31, "test_n": 250, "dataset_pairs": 2498},
     ]
 
+    import random
     result = []
     for reg in region_metadata:
         rid = reg["id"]
         pairs = REAL_TEST_PREDICTIONS.get(rid, {})
-        examples = []
-        for dialect_text, std_text in pairs.items():
-            if len(dialect_text) > 8 and dialect_text != std_text:
-                examples.append(dialect_text)
-                if len(examples) >= 4:
-                    break
-
+        eligible = [
+            d for d, s in pairs.items()
+            if len(d) > 8 and d != s
+        ]
+        examples = random.sample(eligible, min(len(eligible), 4)) if eligible else []
         result.append({**reg, "examples": examples})
 
     return result
+
+
+@app.get("/api/random-sample")
+async def get_random_sample(region: Optional[str] = None, count: int = 4):
+    """
+    Fetches fresh random authentic sample sentences from the research dataset for the specified region.
+    """
+    import random
+    from backend.hf_client import REAL_TEST_PREDICTIONS
+
+    reg = (region or "Chittagong").strip()
+    if reg not in VALID_REGIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid region '{reg}'. Must be one of: {', '.join(VALID_REGIONS)}."
+        )
+
+    pairs = REAL_TEST_PREDICTIONS.get(reg, {})
+    eligible = [
+        {"dialect": d, "standard": s}
+        for d, s in pairs.items()
+        if len(d) > 8 and d != s
+    ]
+
+    count_to_sample = min(len(eligible), max(1, count))
+    sampled = random.sample(eligible, count_to_sample) if eligible else []
+    primary = sampled[0] if sampled else {"dialect": "ক্যান আছু?", "standard": "কেমন আছো?"}
+
+    return {
+        "region": reg,
+        "count": len(sampled),
+        "primary_dialect": primary["dialect"],
+        "primary_standard": primary["standard"],
+        "samples": [item["dialect"] for item in sampled],
+        "detailed_samples": sampled,
+    }
 
 
 @app.post("/api/translate")

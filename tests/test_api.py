@@ -26,6 +26,14 @@ def test_regions_endpoint():
     assert all("examples" in r for r in data)
     assert all("bleu" in r for r in data)
 
+def test_random_sample_endpoint():
+    response = client.get("/api/random-sample?region=Barishal&count=3")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["region"] == "Barishal"
+    assert len(data["samples"]) == 3
+    assert "primary_dialect" in data
+
 def test_insights_endpoint():
     response = client.get("/api/insights")
     assert response.status_code == 200
