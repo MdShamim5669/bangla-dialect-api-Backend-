@@ -101,26 +101,57 @@ def get_simulated_translation(region: str, dialect_sentence: str) -> str:
     if clean in region_dict:
         return region_dict[clean]
 
-    for k, v in region_dict.items():
-        if k in clean or clean in k:
-            return v
-
-    # 3. Common regional rule replacements for general sentences
+    # 3. Whole-token regional rule replacements for general sentences
     replacements = {
-        "Chittagong": [("আই", "আমি"), ("আঁই", "আমি"), ("হাইয়ুম", "খাব"), ("যাইয়ুম", "যাব"), ("ক্যান", "কেমন"), ("আছু", "আছো"), ("তোয়ার", "তোমার"), ("ইতে", "সে"), ("আঁরতু", "আমার")],
-        "Noakhali": [("আঁই", "আমি"), ("হেতে", "সে"), ("হের", "তার"), ("কই", "কোথায়"), ("খাইতাম না", "খাব না")],
-        "Barishal": [("মুই", "আমি"), ("মোর", "আমার"), ("যামু", "যাব"), ("খামু", "খাব"), ("লগে", "সাথে"), ("এট্টু", "একটু")],
-        "Rangpur": [("মুই", "আমি"), ("মোর", "আমার"), ("কোটে", "কোথায়"), ("খামু", "খাব")],
-        "Pabna": [("কনে", "কোথায়"), ("খাতি", "খেতে"), ("যাবানি", "যাব"), ("আসপানে", "আসবে"), ("ক্যাবা", "কেমন"), ("আছ্যাও", "আছো")],
-        "Mymensingh": [("যাইয়াম", "যাব"), ("কনে", "কোথায়"), ("নি", "কি")],
-        "Jashore": [("যাবানে", "যাব"), ("কোনে", "কোথায়"), ("খাবানে", "খাব")],
+        "Chittagong": {
+            "আই": "আমি", "আঁই": "আমি", "আইজকা": "আজকে", "আইজকি": "আজকে", "আইজ্জা": "আজকে",
+            "হাইয়ুম": "খাব", "যাইয়ুম": "যাব", "ক্যান": "কেমন", "আছু": "আছো", "তোয়ার": "তোমার",
+            "ইতে": "সে", "ইতারা": "তারা", "আঁরতু": "আমার", "হনডে": "কোথায়", "গম": "ভালো",
+            "লাগতেছে": "লাগছে", "করতিছি": "করছি",
+        },
+        "Noakhali": {
+            "আঁই": "আমি", "হেতে": "সে", "হের": "তার", "কই": "কোথায়", "খাইতাম না": "খাব না",
+            "আইজকা": "আজকে", "কেমতে": "কীভাবে", "আসি": "আসছি",
+        },
+        "Barishal": {
+            "মুই": "আমি", "মোর": "আমার", "যামু": "যাব", "খামু": "খাব", "লগে": "সাথে",
+            "এট্টু": "একটু", "মনু": "ভাই", "আসি": "আসছি", "করতিছি": "করছি",
+        },
+        "Rangpur": {
+            "মুই": "আমি", "মোর": "আমার", "কোটে": "কোথায়", "খামু": "খাব", "যামু": "যাব",
+            "আইজকা": "আজকে",
+        },
+        "Pabna": {
+            "কনে": "কোথায়", "খাতি": "খেতে", "যাবানি": "যাব", "আসপানে": "আসবে",
+            "ক্যাবা": "কেমন", "আছ্যাও": "আছো", "করতিছি": "করছি",
+        },
+        "Mymensingh": {
+            "যাইয়াম": "যাব", "কনে": "কোথায়", "নি": "কি", "খাইয়াম": "খাব",
+        },
+        "Jashore": {
+            "যাবানে": "যাব", "কোনে": "কোথায়", "খাবানে": "খাব", "করতিছি": "করছি",
+        },
     }
 
-    translated = clean
-    for dial_word, std_word in replacements.get(region, []):
-        translated = translated.replace(dial_word, std_word)
+    region_rules = replacements.get(region, {})
+    tokens = clean.split()
+    new_tokens = []
+    has_replacement = False
 
-    return translated if translated != clean else f"{clean} (মান প্রমিত রূপ)"
+    for token in tokens:
+        stripped = token.strip("।,?!:;\"'")
+        # Extract surrounding punctuation
+        lead_p = token[:len(token) - len(token.lstrip("।,?!:;\"'"))]
+        trail_p = token[len(token.rstrip("।,?!:;\"'")):]
+
+        if stripped in region_rules:
+            new_tokens.append(lead_p + region_rules[stripped] + trail_p)
+            has_replacement = True
+        else:
+            new_tokens.append(token)
+
+    translated = " ".join(new_tokens)
+    return translated if has_replacement else clean
 
 
 async def query_translation(
